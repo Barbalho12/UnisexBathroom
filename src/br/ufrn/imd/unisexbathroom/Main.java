@@ -12,12 +12,15 @@ import br.ufrn.imd.unisexbathroom.util.RandInt;
 
 public class Main {
 
+	private static final int CAPACIDADE_PESSOAS_BANHEIRO = 2;
+	
 	public static void main(String args[]){
+		
+		int capacidade_banheiro = receberArg(args);
 		
 		Notes.print(new Main(), Mensagens.MAIN_PROGRAMA_INICIADO);
 		
-		Banheiro banheiro = new Banheiro(2);
-		
+		Banheiro banheiro = new Banheiro(capacidade_banheiro); 
 		
 		RandInt rand = new RandInt(1, 2);
 		
@@ -44,10 +47,25 @@ public class Main {
 			try {
 				p.join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static int receberArg(String args[]) {
+		int capacidade_banheiro = 0;
+		
+		if (args.length > 0) {
+			try {
+				capacidade_banheiro = Integer.parseInt(args[0]);
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		} else  {
+			capacidade_banheiro = CAPACIDADE_PESSOAS_BANHEIRO;
+		}
+		
+		return capacidade_banheiro;
 	}
 
 }
