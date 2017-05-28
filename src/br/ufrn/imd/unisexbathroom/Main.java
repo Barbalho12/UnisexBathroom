@@ -12,7 +12,7 @@ import br.ufrn.imd.unisexbathroom.util.RandInt;
 
 public class Main {
 
-	private static final int CAPACIDADE_PESSOAS_BANHEIRO = 2;
+	private static final int CAPACIDADE_PESSOAS_BANHEIRO = 3;
 	
 	public static void main(String args[]){
 		
