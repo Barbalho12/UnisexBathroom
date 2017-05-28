@@ -13,9 +13,9 @@ public class Mensagens {
 	public static final String BANHEIRO_FILA_DIMINUIU = "-- %s saiu da fila de espera: %s";
 	
 	public static final String HOMEM_NO_ESCRITORIO = "%s Trabalhando por %d segundos.";
-	public static final String HOMEM_TEMPO_NO_BANHEIRO = " %s Usará o banehiro por %d segundos.";
+	public static final String HOMEM_TEMPO_NO_BANHEIRO = " %s Usará o banheiro por %d segundos.";
 	
 	public static final String MULHER_NO_ESCRITORIO = "%s Trabalhando por %d segundos.";
-	public static final String MULHER_TEMPO_NO_BANHEIRO = " %s Usará o banehiro por %d segundos.";
+	public static final String MULHER_TEMPO_NO_BANHEIRO = " %s Usará o banheiro por %d segundos.";
 
 }
