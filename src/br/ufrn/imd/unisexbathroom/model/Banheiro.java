@@ -13,10 +13,8 @@ public class Banheiro {
 	private List<Pessoa> pessoas;
 	private List<Pessoa> filaEspera;
 	private Status status;
-	private Semaphore semaphore;
 	private Semaphore entrando;
-	private Semaphore esperandoEsvaziar;
-
+	private Semaphore esperandoAlguemSair;
 
 	public Banheiro(int capacidade){
 		this.capacidade = capacidade;
@@ -24,8 +22,7 @@ public class Banheiro {
 		this.pessoas = new ArrayList<>();
 		this.filaEspera = new ArrayList<>();
 
-		semaphore = new Semaphore(capacidade);
-		esperandoEsvaziar = new Semaphore(0);
+		esperandoAlguemSair = new Semaphore(0);
 		entrando = new Semaphore(1);
 		
 	}
@@ -33,48 +30,61 @@ public class Banheiro {
 	public void tentarEntrar(Pessoa pessoa){
 
 		try {
+
+			entrando.acquire(); /////INICIO --- REGIÃO CRÍTICA DE ENTRADA NO BANEIRO
 			
-			entrando.acquire();
-			
+			/*Se banheiro está vazio*/
 			if(status == Status.VAZIO){
-				
-				if(pessoa instanceof Homem){
-					
-					setStatus(Status.MASCULINO);
-					
-				}else if(pessoa instanceof Mulher){
 
-					setStatus(Status.FEMININO);
-					
-				}
+				/*Define o status do banheiro de acordo com o gênero da pessoa*/
+				definirStatus(pessoa);
 
-				entrando.release();
-				
+				/*Pessoa entra no banheiro*/
 				entrar(pessoa);
-
-
-			}else{
 				
-				entrando.release();
+				entrando.release();  /////FIM --- REGIÃO CRÍTICA DE ENTRADA NO BANEIRO
 				
-				if(status == Status.MASCULINO && pessoa instanceof Homem && semaphore.availablePermits() > 0){
-
-					entrar(pessoa);
-
-				}else if(status == Status.FEMININO && pessoa instanceof Mulher && semaphore.availablePermits() > 0){
+			
+			/*Se banheiro não está vazio*/
+			}else if(status != Status.VAZIO){
+				
+				entrando.release();  /////FIM --- REGIÃO CRÍTICA (Não conseguiu entrar no banheiro vazio)
+				
+				/*Se a pessoa é homem e tem vaga no banheiro*/
+				if(status == Status.MASCULINO && pessoa instanceof Homem && pessoas.size() < capacidade){
+					
+					entrando.acquire(); /////INICIO --- REGIÃO CRÍTICA DE ENTRADA NO BANEIRO
 
 					entrar(pessoa);
 					
+					entrando.release(); /////FIM --- REGIÃO CRÍTICA DE ENTRADA NO BANEIRO
+
+				
+				/*Se a pessoa é uma mulher e tem vaga no banheiro*/
+				}else if(status == Status.FEMININO && pessoa instanceof Mulher && pessoas.size() < capacidade){
+
+					entrando.acquire(); /////INICIO --- REGIÃO CRÍTICA DE ENTRADA NO BANEIRO
+
+					entrar(pessoa);
+					
+					entrando.release(); /////FIM --- REGIÃO CRÍTICA DE ENTRADA NO BANEIRO
+				
+				/*Se não, ou por sexo oposto, ou por falta de vaga, ela espera*/	
 				}else{
 
-					entrando.acquire();
 					
-					entrarNaFila(pessoa);
+					entrando.acquire();  /////INICIO --- REGIÃO CRÍTICA DE ENTRADA NO FILA DO BANEIRO
 					
-					entrando.release();
+					entrarNaFila(pessoa); //Entra Fila de espera
 					
-					esperandoEsvaziar.acquire();
+					entrando.release(); /////FIM --- REGIÃO CRÍTICA DE ENTRADA NO FILA DO BANEIRO
+					
+					
+					esperandoAlguemSair.acquire(); ////Pessoa fica esperado na fila de espera alguém do banheiro sair
+					
+					//Se uma pessoa sair, todos da fila são liberados (Espécie de barreira)
 
+					//Após liberadas, elas voltam a tentar entrar no banheiro
 					tentarEntrar(pessoa);
 				}
 				
@@ -82,30 +92,37 @@ public class Banheiro {
 			}
 
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.err.println("Erro durante a entrada de pessoa no banheiro");
+			System.exit(0);
+//			e.printStackTrace();
 		}
 		
 		
 	}
+
+
+	private void definirStatus(Pessoa pessoa) {
+		if(pessoa instanceof Homem){
+			
+			setStatus(Status.MASCULINO);
+			
+		}else if(pessoa instanceof Mulher){
+
+			setStatus(Status.FEMININO);
+			
+		}
+	}
 	
 	private void entrar(Pessoa pessoa){
-		try {
-			semaphore.acquire();
-			
-			entrando.acquire();
-	
-			pessoas.add(pessoa);
-			pessoa.noficarEntrada();
-			mostrarBanheiro();
-			
-			
-			sairDaFila(pessoa);
-			
-			entrando.release();
-			
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+
+		//Sai da fila de espera (se entrou nela)
+		sairDaFilaDeEspera(pessoa);
+
+		//Entra no baheiro
+		pessoas.add(pessoa);
+		pessoa.noficarEntrada();
+		mostrarBanheiro();
+
 	}
 	
 	private void entrarNaFila(Pessoa pessoa){
@@ -116,7 +133,7 @@ public class Banheiro {
 		
 	}
 	
-	private void sairDaFila(Pessoa pessoa){
+	private void sairDaFilaDeEspera(Pessoa pessoa){
 		if(!filaEspera.isEmpty() && filaEspera.contains(pessoa)){
 			filaEspera.remove(pessoa);
 			Notes.print(this, Mensagens.BANHEIRO_FILA_DIMINUIU, pessoa.getID(), filaEspera.toString());
@@ -128,24 +145,26 @@ public class Banheiro {
 		try {
 			
 			
-			entrando.acquire();
+			entrando.acquire(); ////INICIO --- REGIÃO CRÍTICA: IMPEDE QUE ALGUEM ENTRE, ENQUANTO A PESSOA ESTÁ SAINDO
 			
+			/*Ocupante sai do banheiro*/
 			pessoas.remove(pessoa);
-			
-			if(pessoas.isEmpty()){
-				setStatus(Status.VAZIO);
-				esperandoEsvaziar.release(esperandoEsvaziar.getQueueLength());
-			}
-			
-			semaphore.release();
-			
 			pessoa.noficarSaida();
 			mostrarBanheiro();
 			
-			entrando.release();
+			/*Se banehiro ficou vazio, Status é alterado*/
+			if(pessoas.isEmpty()){
+				setStatus(Status.VAZIO);
+			}
+			
+			/*Libera pessoas que estavam esperando para tentar entrar novamente*/
+			esperandoAlguemSair.release(esperandoAlguemSair.getQueueLength());
+			
+			entrando.release(); ////FIM --- REGIÃO CRÍTICA: PESSOA JÁ SAIU, ENTRADA LIBERADA!
 			
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.err.println("Erro durante a saída de pessoa do banheiro");
+			System.exit(0);
 		}
 	}
 	
