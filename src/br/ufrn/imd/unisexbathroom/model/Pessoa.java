@@ -30,11 +30,11 @@ public abstract class Pessoa extends Thread{
 	}
 	
 	public void noficarEntrada(){
-		Notes.print(this, Mensagens.PESSOA_ENTROU_BANHEIRO, getID());
+		Notes.print(this, Mensagens.PESSOA_ENTROU_BANHEIRO, toString());
 	}
 	
 	public void noficarSaida(){
-		Notes.print(this, Mensagens.PESSOA_SAIU_BANHEIRO, getID());
+		Notes.print(this, Mensagens.PESSOA_SAIU_BANHEIRO, toString());
 	}
 	
 	protected abstract void sairDoBanheiro();
