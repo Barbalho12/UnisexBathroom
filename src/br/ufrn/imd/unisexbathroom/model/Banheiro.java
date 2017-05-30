@@ -22,8 +22,8 @@ public class Banheiro {
 		this.pessoas = new ArrayList<>();
 		this.filaEspera = new ArrayList<>();
 
-		esperandoAlguemSair = new Semaphore(0);
-		entrando = new Semaphore(1);
+		this.esperandoAlguemSair = new Semaphore(0);
+		this.entrando = new Semaphore(1);
 		
 	}
 	
@@ -37,7 +37,6 @@ public class Banheiro {
 		}
 	}
 
-	
 	public void tentarEntrar(Pessoa pessoa){
 		try {
 			
@@ -76,18 +75,11 @@ public class Banheiro {
 		}
 	}
 
-
 	private void definirStatus(Pessoa pessoa) {
-		
-		
 		if(pessoa instanceof Homem){
-			
 			setStatus(Status.MASCULINO);
-			
 		}else if(pessoa instanceof Mulher){
-
 			setStatus(Status.FEMININO);
-			
 		}
 	}
 	
@@ -113,7 +105,6 @@ public class Banheiro {
 			filaEspera.add(pessoa);
 			Notes.print(this, Mensagens.BANHEIRO_FILA_AUMENTOU, pessoa.toString(), filaEspera.toString());
 		}
-		
 	}
 	
 	private void sairDaFilaDeEspera(Pessoa pessoa){
@@ -125,9 +116,9 @@ public class Banheiro {
 	
 	
 	public void sair(Pessoa pessoa){
+		
 		try {
-			
-			
+
 			entrando.acquire(); ////INICIO --- REGIÃO CRÍTICA: IMPEDE QUE ALGUEM ENTRE, ENQUANTO A PESSOA ESTÁ SAINDO
 			
 			/*Ocupante sai do banheiro*/
