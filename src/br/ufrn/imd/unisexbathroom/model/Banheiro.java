@@ -2,7 +2,6 @@ package br.ufrn.imd.unisexbathroom.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 import br.ufrn.imd.unisexbathroom.Mensagens;
 import br.ufrn.imd.unisexbathroom.util.Notes;
@@ -13,17 +12,19 @@ public class Banheiro {
 	private List<Pessoa> ocupantes;
 	private List<Pessoa> listaDeEspera;
 	private Status status;
-	private Semaphore entrando;
-	private Semaphore esperandoAlguemSair;
+//	private Semaphore entrando;
+//	private Semaphore esperandoAlguemSair;
+	private Barreira barreira;
 
 	public Banheiro(int capacidade){
 		this.capacidade = capacidade;
 		this.status = Status.VAZIO;
 		this.ocupantes = new ArrayList<>();
 		this.listaDeEspera = new ArrayList<>();
-
-		this.esperandoAlguemSair = new Semaphore(0, true);
-		this.entrando = new Semaphore(1, true);
+		
+		barreira = new Barreira();
+//		this.esperandoAlguemSair = new Semaphore(0, true);
+//		this.entrando = new Semaphore(1, true);
 		
 	}
 
@@ -35,7 +36,7 @@ public class Banheiro {
 		try {
 			
 			/*Se pessoa não conseguir acessar o banheiro*/
-			if( !acessarBanehiro(pessoa) ){
+			if( !acessarBanheiro(pessoa) ){
 				
 				/*Fica esperando, até que alguem saia*/
 				esperar(pessoa);
@@ -55,14 +56,14 @@ public class Banheiro {
 	 * @param pessoa homem ou mulher que ocupará o banheiro
 	 */
 	public void sair(Pessoa pessoa){
-		try {
-			entrando.acquire();
+//		try {
+//			entrando.acquire();
 			atualizarOcupantes(pessoa, Sentido.SAIR);
-			entrando.release();
-		} catch (InterruptedException e) {
-			System.err.println("Erro durante a entrada de pessoa no banheiro");
-			System.exit(0);
-		}
+//			entrando.release();
+//		} catch (InterruptedException e) {
+//			System.err.println("Erro durante a entrada de pessoa no banheiro");
+//			System.exit(0);
+//		}
 		
 	}
 	
@@ -73,17 +74,17 @@ public class Banheiro {
 	 * @return 
 	 * @throws InterruptedException erro durante a entrada
 	 */
-	private boolean acessarBanehiro(Pessoa pessoa) throws InterruptedException{
+	private synchronized boolean acessarBanheiro(Pessoa pessoa) throws InterruptedException{
 		
-		entrando.acquire();
-		boolean acesso = false;
+//		entrando.acquire();
+//		boolean acesso = false;
 		if(status == Status.VAZIO || (ocupantes.size() < capacidade && validarStatus(pessoa))){
 			atualizarOcupantes(pessoa, Sentido.ENTRAR);
-			acesso = true;
+			return true;
 		}
-		entrando.release();
+//		entrando.release();
 		
-		return acesso;
+		return false;
 	}
 	
 	/**
@@ -92,11 +93,12 @@ public class Banheiro {
 	 * @throws InterruptedException erro durante a entrada
 	 */
 	private void esperar(Pessoa pessoa) throws InterruptedException{
-		entrando.acquire();  
+//		entrando.acquire();  
 		atualizarListaEspera(pessoa, Sentido.ENTRAR);
-		entrando.release(); 
+//		entrando.release(); 
 		
-		esperandoAlguemSair.acquire(); 
+		barreira.chegada(false);
+//		esperandoAlguemSair.acquire(); 
 	}
 	
 	/**
@@ -104,7 +106,7 @@ public class Banheiro {
 	 * @param pessoa homem ou mulher que ocupará o banheiro
 	 * @param sentido entrada ou saída de pessoa
 	 */
-	private void atualizarOcupantes(Pessoa pessoa, Sentido sentido){
+	private synchronized void atualizarOcupantes(Pessoa pessoa, Sentido sentido){
 		
 		if(sentido == Sentido.ENTRAR){
 			/*Caso o banheiro esteja vazio, passa a ter um novo status de gênero*/
@@ -133,7 +135,8 @@ public class Banheiro {
 			}
 			
 			/*Libera pessoas que estavam esperando para tentar entrar novamente*/
-			esperandoAlguemSair.release(esperandoAlguemSair.getQueueLength());
+//			esperandoAlguemSair.release(esperandoAlguemSair.getQueueLength());
+			barreira.chegada(true);
 		}
 		
 	}
@@ -143,7 +146,7 @@ public class Banheiro {
 	 * @param pessoa homem ou mulher que ocupará o banheiro
 	 * @param sentido entrada ou saída de pessoa
 	 */
-	private void atualizarListaEspera(Pessoa pessoa, Sentido sentido){
+	private synchronized void atualizarListaEspera(Pessoa pessoa, Sentido sentido){
 		if(sentido == Sentido.ENTRAR && !listaDeEspera.contains(pessoa)){
 			listaDeEspera.add(pessoa);
 			Notes.print(this, Mensagens.BANHEIRO_FILA_AUMENTOU, pessoa.toString(), listaDeEspera.toString());
