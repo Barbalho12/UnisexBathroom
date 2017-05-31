@@ -16,7 +16,7 @@ public class Notes {
 	}
 	
 	public static void print(Object obClass, String message, Object... object) {
-//		String TAG = "["+obClass.getClass().getSimpleName().toUpperCase()+"]\t";
+		
 		System.out.printf(getHora() + "  " + count++ + "\t"+message+"\n",object);
 		
 	}

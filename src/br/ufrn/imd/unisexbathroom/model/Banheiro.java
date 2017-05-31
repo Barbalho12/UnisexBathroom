@@ -12,8 +12,6 @@ public class Banheiro {
 	private List<Pessoa> ocupantes;
 	private List<Pessoa> listaDeEspera;
 	private Status status;
-//	private Semaphore entrando;
-//	private Semaphore esperandoAlguemSair;
 	private Barreira barreira;
 
 	public Banheiro(int capacidade){
@@ -23,9 +21,6 @@ public class Banheiro {
 		this.listaDeEspera = new ArrayList<>();
 		
 		barreira = new Barreira();
-//		this.esperandoAlguemSair = new Semaphore(0, true);
-//		this.entrando = new Semaphore(1, true);
-		
 	}
 
 	/**
@@ -56,15 +51,7 @@ public class Banheiro {
 	 * @param pessoa homem ou mulher que ocupará o banheiro
 	 */
 	public void sair(Pessoa pessoa){
-//		try {
-//			entrando.acquire();
-			atualizarOcupantes(pessoa, Sentido.SAIR);
-//			entrando.release();
-//		} catch (InterruptedException e) {
-//			System.err.println("Erro durante a entrada de pessoa no banheiro");
-//			System.exit(0);
-//		}
-		
+		atualizarOcupantes(pessoa, Sentido.SAIR);
 	}
 	
 
@@ -75,14 +62,10 @@ public class Banheiro {
 	 * @throws InterruptedException erro durante a entrada
 	 */
 	private synchronized boolean acessarBanheiro(Pessoa pessoa) throws InterruptedException{
-		
-//		entrando.acquire();
-//		boolean acesso = false;
 		if(status == Status.VAZIO || (ocupantes.size() < capacidade && validarStatus(pessoa))){
 			atualizarOcupantes(pessoa, Sentido.ENTRAR);
 			return true;
 		}
-//		entrando.release();
 		
 		return false;
 	}
@@ -93,12 +76,8 @@ public class Banheiro {
 	 * @throws InterruptedException erro durante a entrada
 	 */
 	private void esperar(Pessoa pessoa) throws InterruptedException{
-//		entrando.acquire();  
-		atualizarListaEspera(pessoa, Sentido.ENTRAR);
-//		entrando.release(); 
-		
+		atualizarListaEspera(pessoa, Sentido.ENTRAR); 		
 		barreira.chegada(false);
-//		esperandoAlguemSair.acquire(); 
 	}
 	
 	/**
@@ -117,7 +96,7 @@ public class Banheiro {
 			/*Sai da fila de espera (se entrou nela)*/
 			atualizarListaEspera(pessoa, Sentido.SAIR);
 			
-			/*Entra no baheiro*/
+			/*Entra no banheiro*/
 			ocupantes.add(pessoa);
 			pessoa.noficarEntrada();
 			Notes.print(this, Mensagens.BANHEIRO_OCUPANTES, ocupantes.toString());
@@ -129,13 +108,12 @@ public class Banheiro {
 			pessoa.noficarSaida();
 			Notes.print(this, Mensagens.BANHEIRO_OCUPANTES, ocupantes.toString());
 			
-			/*Se banehiro ficou vazio, Status é alterado*/
+			/*Se banheiro ficou vazio, Status é alterado*/
 			if(ocupantes.isEmpty()){
 				setStatus(Status.VAZIO);
 			}
 			
 			/*Libera pessoas que estavam esperando para tentar entrar novamente*/
-//			esperandoAlguemSair.release(esperandoAlguemSair.getQueueLength());
 			barreira.chegada(true);
 		}
 		
