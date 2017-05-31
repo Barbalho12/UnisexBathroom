@@ -115,7 +115,7 @@ public class Banheiro {
 			/*Sai da fila de espera (se entrou nela)*/
 			atualizarListaEspera(pessoa, Sentido.SAIR);
 			
-			/*Entra no baheiro*/
+			/*Entra no banheiro*/
 			ocupantes.add(pessoa);
 			pessoa.noficarEntrada();
 			Notes.print(this, Mensagens.BANHEIRO_OCUPANTES, ocupantes.toString());
@@ -127,7 +127,7 @@ public class Banheiro {
 			pessoa.noficarSaida();
 			Notes.print(this, Mensagens.BANHEIRO_OCUPANTES, ocupantes.toString());
 			
-			/*Se banehiro ficou vazio, Status é alterado*/
+			/*Se banheiro ficou vazio, Status é alterado*/
 			if(ocupantes.isEmpty()){
 				setStatus(Status.VAZIO);
 			}

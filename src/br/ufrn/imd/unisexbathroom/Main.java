@@ -27,6 +27,7 @@ public class Main {
 		
 		List<Pessoa> pessoas = new ArrayList<>();
 		
+		/* Criação de pessoas e adição na lista.*/
 		for (int i = 0; i < QUANTIDADE_PESSOAS; i++) {
 			int randomico = rand.rand();
 
@@ -41,10 +42,12 @@ public class Main {
 			}
 		}
 		
+		/* Threads passam para o estado de execução. */
 		for(Pessoa p : pessoas){
 			p.start();
 		}
 		
+		/* Threads aguardam término de execução das demais. */ 
 		for(Pessoa p : pessoas){
 			try {
 				p.join();
@@ -54,6 +57,10 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * Receber argumentos do usuário
+	 * @param args argumentos passados via linha de comando.
+	 */
 	public static int receberArg(String args[]) {
 		int capacidade_banheiro = 0;
 		
