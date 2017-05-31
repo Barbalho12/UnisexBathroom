@@ -13,6 +13,7 @@ import br.ufrn.imd.unisexbathroom.util.RandInt;
 public class Main {
 
 	private static final int CAPACIDADE_PESSOAS_BANHEIRO = 3;
+	private static final int QUANTIDADE_PESSOAS = 12;
 	
 	public static void main(String args[]){
 		
@@ -26,7 +27,8 @@ public class Main {
 		
 		List<Pessoa> pessoas = new ArrayList<>();
 		
-		for (int i = 0; i < 12; i++) {
+		/* Criação de pessoas e adição na lista.*/
+		for (int i = 0; i < QUANTIDADE_PESSOAS; i++) {
 			int randomico = rand.rand();
 
 			if(randomico == 1){
@@ -40,10 +42,12 @@ public class Main {
 			}
 		}
 		
+		/* Threads passam para o estado de execução. */
 		for(Pessoa p : pessoas){
 			p.start();
 		}
 		
+		/* Threads aguardam término de execução das demais. */ 
 		for(Pessoa p : pessoas){
 			try {
 				p.join();
@@ -53,6 +57,10 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * Receber argumentos do usuário
+	 * @param args argumentos passados via linha de comando.
+	 */
 	public static int receberArg(String args[]) {
 		int capacidade_banheiro = 0;
 		
