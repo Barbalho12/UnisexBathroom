@@ -15,13 +15,12 @@ public abstract class Pessoa extends Thread{
 
 	@Override
 	public void run() {
-		while(condicao()){
+		while(true){
 			try {
 				irAoBanheiro();
 				tempoNoBanheiro();
 				sairDoBanheiro();
-				tempoNoEscritorio();
-				
+				break;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				System.exit(0);
@@ -30,22 +29,22 @@ public abstract class Pessoa extends Thread{
 	}
 	
 	public void noficarEntrada(){
-		Notes.print(this, Mensagens.PESSOA_ENTROU_BANHEIRO, getID());
+		Notes.print(this, Mensagens.PESSOA_ENTROU_BANHEIRO, toString());
 	}
 	
 	public void noficarSaida(){
-		Notes.print(this, Mensagens.PESSOA_SAIU_BANHEIRO, getID());
+		Notes.print(this, Mensagens.PESSOA_SAIU_BANHEIRO, toString());
 	}
 	
-	protected abstract void sairDoBanheiro();
+	private void sairDoBanheiro() {
+		getBanheiroREF().sair(this);
+	}
 
-	protected abstract void irAoBanheiro();
-
-	protected abstract void tempoNoEscritorio() throws InterruptedException;
+	private void irAoBanheiro() {
+		getBanheiroREF().tentarEntrar(this);	
+	}
 
 	protected abstract void tempoNoBanheiro() throws InterruptedException;
-
-	protected abstract boolean condicao();
 
 	public String getID() {
 		return ID;
@@ -68,6 +67,4 @@ public abstract class Pessoa extends Thread{
 		return "["+ID+"]";
 	}
 	
-	
-
 }
