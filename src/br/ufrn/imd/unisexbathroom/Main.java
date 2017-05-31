@@ -13,6 +13,7 @@ import br.ufrn.imd.unisexbathroom.util.RandInt;
 public class Main {
 
 	private static final int CAPACIDADE_PESSOAS_BANHEIRO = 3;
+	private static final int QUANTIDADE_PESSOAS = 12;
 	
 	public static void main(String args[]){
 		
@@ -26,7 +27,7 @@ public class Main {
 		
 		List<Pessoa> pessoas = new ArrayList<>();
 		
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < QUANTIDADE_PESSOAS; i++) {
 			int randomico = rand.rand();
 
 			if(randomico == 1){
