@@ -27,16 +27,17 @@ public class Main {
 		List<Pessoa> pessoas = new ArrayList<>();
 		
 		for (int i = 0; i < 12; i++) {
-			if(rand.rand() == 1){
+			int randomico = rand.rand();
+
+			if(randomico == 1){
 				Homem homem = new Homem("H"+i, banheiro);
 				pessoas.add(homem);
 				Notes.print(new Main(), Mensagens.MAIN_CRIACAO, homem.getID());
-			}else if(rand.rand() == 2){
+			}else if(randomico == 2){
 				Mulher mulher = new Mulher("M"+i, banheiro);
 				pessoas.add(mulher);
 				Notes.print(new Main(), Mensagens.MAIN_CRIACAO, mulher.getID());
 			}
-			
 		}
 		
 		for(Pessoa p : pessoas){
