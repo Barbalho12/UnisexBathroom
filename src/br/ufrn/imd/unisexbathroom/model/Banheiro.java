@@ -35,7 +35,7 @@ public class Banheiro {
 		try {
 			
 			/*Se pessoa não conseguir acessar o banheiro*/
-			if( !acessarBanehiro(pessoa) ){
+			if( !acessarBanheiro(pessoa) ){
 				
 				/*Fica esperando, até que alguem saia*/
 				esperar(pessoa);
@@ -73,7 +73,7 @@ public class Banheiro {
 	 * @return 
 	 * @throws InterruptedException erro durante a entrada
 	 */
-	private boolean acessarBanehiro(Pessoa pessoa) throws InterruptedException{
+	private boolean acessarBanheiro(Pessoa pessoa) throws InterruptedException{
 		
 		entrando.acquire();
 		boolean acesso = false;
